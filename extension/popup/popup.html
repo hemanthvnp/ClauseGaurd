@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClauseGuard</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        margin: 0;
+        padding: 16px;
+        width: 300px;
+        color: #1e293b;
+        font-size: 14px;
+        background: #fff;
+      }
+      h1 { font-size: 16px; margin: 0 0 4px; font-weight: 700; color: #0f172a; }
+      .subtitle { font-size: 12px; color: #64748b; margin: 0 0 16px; }
+      .section { margin-bottom: 16px; }
+      label { display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #0f172a;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      input[type="text"]:focus { border-color: #0d9488; }
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 8px;
+        border: 0;
+        background: #0f172a;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .btn:hover { background: #1e293b; }
+      .btn-outline {
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        margin-top: 8px;
+      }
+      .btn-outline:hover { background: #f8fafc; }
+      .notice {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+        margin-bottom: 12px;
+        padding: 8px 10px;
+        background: #f8fafc;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+      }
+      #save-status {
+        font-size: 12px;
+        margin-top: 6px;
+        min-height: 16px;
+        color: #16a34a;
+      }
+      .divider { border: none; border-top: 1px solid #e2e8f0; margin: 12px 0; }
+    </style>
+  </head>
+  <body>
+    <h1>ClauseGuard</h1>
+    <p class="subtitle">Legal document risk analyzer</p>
+
+    <div class="notice">
+      Open a terms or privacy page and click the floating <strong>"Analyze with ClauseGuard"</strong> button to analyze it.
+    </div>
+
+    <div class="section">
+      <label for="api-base">Backend API URL</label>
+      <input type="text" id="api-base" placeholder="http://localhost:8000" />
+      <div id="save-status"></div>
+    </div>
+
+    <button class="btn" id="save-btn">Save Settings</button>
+    <hr class="divider" />
+    <button class="btn btn-outline" id="open-dashboard">Open API Docs</button>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

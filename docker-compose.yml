@@ -1,0 +1,107 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: clauseguard
+      POSTGRES_USER: clauseguard
+      POSTGRES_PASSWORD: clauseguard
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clauseguard -d clauseguard"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: minio123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgresql://clauseguard:clauseguard@postgres:5432/clauseguard
+      REDIS_URL: redis://redis:6379/0
+      CLAUDE_MODEL: claude-sonnet-4-6
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_BUCKET: clauseguard-docs
+      PROCESSING_STORAGE_PATH: /app/storage
+    volumes:
+      - docstore:/app/storage
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+
+  celery:
+    build:
+      context: ./backend
+    command: celery -A app.tasks.document_processor:celery_app worker --loglevel=info --concurrency=2
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: postgresql://clauseguard:clauseguard@postgres:5432/clauseguard
+      REDIS_URL: redis://redis:6379/0
+      CLAUDE_MODEL: claude-sonnet-4-6
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_BUCKET: clauseguard-docs
+      PROCESSING_STORAGE_PATH: /app/storage
+    volumes:
+      - docstore:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+    env_file:
+      - ./.env
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+      VITE_APP_NAME: ClauseGuard
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  miniodata:
+  docstore:
