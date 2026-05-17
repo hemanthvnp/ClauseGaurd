@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session
 from app.core.config import get_settings
 from app.core.database import SessionLocal
 from app.core.metrics import dec_websocket_connections, inc_websocket_connections
-from app.core.security import decode_access_token
+from app.core.security import decode_token
 from app.models.schema import Document
 
 router = APIRouter(tags=["websocket"])
@@ -173,7 +173,7 @@ def publish_progress(document_id: str, stage: str, pct: int, detail: str | None 
 
 def _authenticate(token: str) -> str | None:
     try:
-        payload = decode_access_token(token)
+        payload = decode_token(token)
         return payload.get("sub")
     except Exception:
         return None

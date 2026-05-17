@@ -32,7 +32,7 @@ import threading
 from collections import defaultdict
 from typing import Callable
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, status
 
 from app.core.config import get_settings
 from app.core.security import get_current_user
@@ -151,7 +151,6 @@ class RateLimiter:
 
     def __call__(
         self,
-        request: Request,
         current_user: User = Depends(get_current_user),
     ) -> None:
         user_id = str(current_user.id)

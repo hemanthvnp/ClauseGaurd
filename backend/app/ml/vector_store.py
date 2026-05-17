@@ -289,7 +289,7 @@ class ClauseVectorStore:
         records: list[_ClauseRecord],
         global_indices: list[int],
     ) -> list[tuple[float, int]]:
-        """Reciprocal Rank Fusion: score = Σ 1/(rank + 60)."""
+        """Reciprocal Rank Fusion: score = Σ 1/(rank + 60). Returns (score, idx) pairs."""
         k = 60
         rrf: dict[int, float] = {}
         for rank, (_, idx) in enumerate(dense):
@@ -297,7 +297,8 @@ class ClauseVectorStore:
         for rank, (_, local_idx) in enumerate(sparse):
             g_idx = global_indices[local_idx] if global_indices else local_idx
             rrf[g_idx] = rrf.get(g_idx, 0.0) + 1.0 / (rank + k)
-        return sorted(rrf.items(), key=lambda x: x[1], reverse=True)
+        # Return (score, idx) to be consistent with dense/sparse search return type
+        return [(score, int(idx)) for idx, score in sorted(rrf.items(), key=lambda x: x[1], reverse=True)]
 
 
 # ── Per-document cache (LRU, capped at 128 documents) ────────────────────────

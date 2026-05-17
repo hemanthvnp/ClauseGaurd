@@ -19,7 +19,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.database import Base, get_db
-from app.core.security import create_access_token, get_password_hash
+from app.core.security import create_access_token, hash_password
 from app.main import app
 from app.models.schema import Clause, Document, User
 
@@ -65,7 +65,7 @@ def sample_user(db: Session) -> User:
     user = User(
         id=uuid.uuid4(),
         email="test@clauseguard.ai",
-        password_hash=get_password_hash("testpassword123"),
+        password_hash=hash_password("testpassword123"),
     )
     db.add(user)
     db.commit()
@@ -75,7 +75,7 @@ def sample_user(db: Session) -> User:
 
 @pytest.fixture
 def auth_headers(sample_user: User) -> dict[str, str]:
-    token = create_access_token({"sub": str(sample_user.id), "email": sample_user.email})
+    token = create_access_token(str(sample_user.id))
     return {"Authorization": f"Bearer {token}"}
 
 
